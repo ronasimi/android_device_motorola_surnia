@@ -92,6 +92,7 @@ OVERRIDE_RS_DRIVER := libRSDriver_adreno.so
 
 # FM
 TARGET_QCOM_NO_FM_FIRMWARE := true
+AUDIO_FEATURE_ENABLED_FM := true
 
 # GPS
 TARGET_NO_RPC := true
