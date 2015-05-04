@@ -154,6 +154,7 @@ BOARD_SEPOLICY_UNION += \
     file.te \
     file_contexts \
     init.te \
+    init_shell.te \
     mbm_spy.te \
     mm-qcamerad.te \
     mpdecision.te \
@@ -164,6 +165,7 @@ BOARD_SEPOLICY_UNION += \
     stml0xx.te \
     system_server.te \
     tcmd.te \
+    tee.te \
     ueventd.te
 
 # Time services
