@@ -154,6 +154,7 @@ BOARD_SEPOLICY_UNION += \
     mpdecision.te \
     property.te \
     property_contexts \
+    qcamerasvr.te \
     rild.te \
     rmt_storage.te \
     stml0xx.te \
