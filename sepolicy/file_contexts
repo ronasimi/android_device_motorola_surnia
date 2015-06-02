@@ -9,7 +9,7 @@
 
 # Camera
 /data/cam_socket[12]           u:object_r:camera_socket:s0
-/system/bin/qcamerasvr         u:object_r:qcamera_svr_exec:s0
+/system/bin/qcamerasvr         u:object_r:qcamerasvr_exec:s0
 
 # CMHW
 /sys/devices/platform/kcal_ctrl\.0(/.*)?                    u:object_r:display_sysfs:s0
