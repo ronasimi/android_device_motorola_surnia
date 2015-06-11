@@ -277,8 +277,11 @@
         <item>"supl"</item>
     </string-array>
 
+<<<<<<< HEAD
+=======
     <!-- Indicate whether the SD card is accessible without removing the battery. -->
     <bool name="config_batterySdCardAccessibility">true</bool>
 
     <bool name="config_useDevInputEventForAudioJack">true</bool>
+>>>>>>> 17df15d... set the inputevent for audio jack
 </resources>
