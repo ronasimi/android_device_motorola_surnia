@@ -32,6 +32,7 @@
 /******************************************************************************/
 
 #define MAX_PATH_SIZE 80
+#define LOG_TAG "lights"
 
 static pthread_once_t g_init = PTHREAD_ONCE_INIT;
 static pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
@@ -45,9 +46,9 @@ char const*const WHITE_LED_FILE
 char const*const LCD_FILE
         = "/sys/class/leds/lcd-backlight/brightness";
 
-char const*const RGB_CONTROL_FILE
-        = "/sys/class/leds/rgb/control";
-
+char const *const WHITE_LED_TRIGGER = "/sys/class/leds/charging/trigger";
+char const *const WHITE_LED_DELAY_ON = "/sys/class/leds/charging/delay_on"; 
+char const *const WHITE_LED_DELAY_OFF = "/sys/class/leds/charging/delay_off";
 /**
  * device methods
  */
@@ -151,6 +152,11 @@ set_speaker_light_locked(struct light_device_t* dev,
     }
 
     colorRGB = state->color;
+#if 1
+    ALOGD("set_speaker_light_locked mode %d, colorRGB=%08X, onMS=%d, offMS=%d\n",
+            state->flashMode, colorRGB, onMS, offMS);
+#endif
+
 
     if (onMS > 0 && offMS > 0) {
 
@@ -168,20 +174,31 @@ set_speaker_light_locked(struct light_device_t* dev,
     write_int(WHITE_LED_FILE, (int) brightness);
 
     if (blink) {
-        sprintf(blink_pattern,"%6x %d %d %d %d",colorRGB,onMS,offMS,ramp,ramp);
-        write_str(RGB_CONTROL_FILE, blink_pattern);
+    	write_str(WHITE_LED_TRIGGER, "notification");
+	sprintf(blink_pattern, "%d", onMS);
+	write_str(WHITE_LED_DELAY_ON, blink_pattern);
+	sprintf(blink_pattern, "%d", offMS);
+	write_str(WHITE_LED_DELAY_OFF, blink_pattern);
+    }else{
+    	write_str(WHITE_LED_TRIGGER, "none");
     }
 
-    return 0;
+    return brightness;
 }
 
 static void
 handle_speaker_battery_locked(struct light_device_t* dev)
 {
-    if (is_lit(&g_battery)) {
-        set_speaker_light_locked(dev, &g_battery);
-    } else {
-        set_speaker_light_locked(dev, &g_notification);
+    int res = set_speaker_light_locked(dev, &g_notification);
+    if (res){
+        ALOGD("notification on\n");
+        return;
+    }
+    res = set_speaker_light_locked(dev, &g_battery);
+    if (res){
+        ALOGD("battery on\n");
+    }else{
+        ALOGD("no notification\n");
     }
 }
 
@@ -190,6 +207,7 @@ set_light_notifications(struct light_device_t* dev,
         struct light_state_t const* state)
 {
     pthread_mutex_lock(&g_lock);
+    ALOGD("notification light %d\n", state->color);
     g_notification = *state;
     handle_speaker_battery_locked(dev);
     pthread_mutex_unlock(&g_lock);
@@ -210,6 +228,19 @@ set_light_attention(struct light_device_t* dev,
     pthread_mutex_unlock(&g_lock);
     return 0;
 }
+
+static int
+set_light_battery(struct light_device_t* dev,
+        struct light_state_t const* state)
+{
+    pthread_mutex_lock(&g_lock);
+    g_battery = *state;
+    ALOGD("batterie led\n");
+    handle_speaker_battery_locked(dev);
+    pthread_mutex_unlock(&g_lock);
+    return 0;
+}
+
 
 
 /** Close the lights device */
@@ -238,6 +269,8 @@ static int open_lights(const struct hw_module_t* module, char const* name,
 
     if (0 == strcmp(LIGHT_ID_BACKLIGHT, name))
         set_light = set_light_backlight;
+    else if (0 == strcmp(LIGHT_ID_BATTERY, name))
+        set_light = set_light_battery;
     else if (0 == strcmp(LIGHT_ID_NOTIFICATIONS, name))
         set_light = set_light_notifications;
     else if (0 == strcmp(LIGHT_ID_ATTENTION, name))
@@ -266,13 +299,14 @@ static struct hw_module_methods_t lights_module_methods = {
 
 /*
  * The lights Module
+ * Based on dhacker29 module
  */
 struct hw_module_t HAL_MODULE_INFO_SYM = {
     .tag = HARDWARE_MODULE_TAG,
     .version_major = 1,
     .version_minor = 0,
     .id = LIGHTS_HARDWARE_MODULE_ID,
-    .name = "MSM8226 lights Module",
-    .author = "Google, Inc., dhacker29",
+    .name = "MSM8916 lights Module",
+    .author = "Google, Inc., scritch007",
     .methods = &lights_module_methods,
 };
