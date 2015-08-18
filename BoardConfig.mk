@@ -72,7 +72,6 @@ USE_DEVICE_SPECIFIC_CAMERA := true
 TARGET_HW_DISK_ENCRYPTION := true
 
 # Display
-BOARD_EGL_CFG := $(LOCAL_PATH)/egl.cfg
 NUM_FRAMEBUFFER_SURFACE_BUFFERS := 3
 TARGET_HAVE_NEW_GRALLOC := true
 TARGET_USES_C2D_COMPOSITION := true
@@ -139,6 +138,7 @@ BOARD_SEPOLICY_DIRS += \
     device/motorola/surnia/sepolicy
 
 BOARD_SEPOLICY_UNION += \
+    atfwd.te \
     atvc.te \
     batt_health.te \
     bluetooth_loader.te \
@@ -158,12 +158,15 @@ BOARD_SEPOLICY_UNION += \
     qseecomd.te \
     rild.te \
     rmt_storage.te \
+    shell.te \
     stml0xx.te \
+    subsystem_ramdump.te \
     surfaceflinger.te \
     system_server.te \
     tcmd.te \
     tee.te \
     ueventd.te \
+    vold.te \
     wcnss_service.te
 
 # Time services
